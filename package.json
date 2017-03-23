@@ -1,25 +1,25 @@
 {
-    "name": "githistory",
-    "displayName": "Git History (git log)",
-    "description": "View git log, file or line History",
-    "version": "0.2.0",
-    "publisher": "donjayamanne",
+    "name": "mercurial",
+    "displayName": "Mercurial",
+    "description": "Mercurial Visual Studio Code integration.",
+    "version": "0.1.0",
+    "publisher": "nealtheseal",
     "author": {
-        "name": "Don Jayamanne",
-        "email": "don.jayamanne@yahoo.com"
+        "name": "Neal \"the\" Seal",
+        "email": "nealtheseal2@gmail.com"
     },
     "license": "MIT",
-    "homepage": "https://github.com/DonJayamanne/gitHistoryVSCode/blob/master/README.md",
+    "homepage": "https://github.com/NealTheSeal/mercurialVSCode/blob/master/README.md",
     "repository": {
         "type": "git",
-        "url": "https://github.com/DonJayamanne/gitHistoryVSCode"
+        "url": "https://github.com/NealTheSeal/mercurialVSCode"
     },
     "icon": "images/icon.png",
     "bugs": {
-        "url": "https://github.com/DonJayamanne/gitHistoryVSCode/issues"
+        "url": "https://github.com/NealTheSeal/mercurialVSCode/issues"
     },
     "galleryBanner": {
-        "color": "#0000FF",
+        "color": "#6f6f72",
         "theme": "dark"
     },
     "engines": {
@@ -34,56 +34,6 @@
         "onCommand:git.viewHistory"
     ],
     "main": "./out/src/extension",
-    "contributes": {
-        "commands": [
-            {
-                "command": "git.viewFileHistory",
-                "title": "Git: View File History"
-            },
-            {
-                "command": "git.viewLineHistory",
-                "title": "Git: View Line History"
-            },
-            {
-                "command": "git.viewHistory",
-                "title": "Git: View History (git log)"
-            }
-        ],
-        "menus": {
-            "explorer/context": [
-                {
-                    "command": "git.viewFileHistory",
-                    "group": "git"
-                }
-            ]
-        },
-        "configuration": {
-            "type": "object",
-            "title": "Git History configuration",
-            "properties": {
-                "gitHistory.displayLabel": {
-                    "type": "string",
-                    "default": "${message}",
-                    "description": "Informations to display in history as label"
-                },
-                "gitHistory.displayDescription": {
-                    "type": "string",
-                    "default": "",
-                    "description": "Informations to display in history as description"
-                },
-                "gitHistory.displayDetail": {
-                    "type": "string",
-                    "default": "${name} on ${date}",
-                    "description": "Informations to display in history as detail"
-                },
-                "gitHistory.logLevel": {
-                    "type": "string",
-                    "default": "Debug",
-                    "description": "Log Level [Debug|Info|Error]"
-                }
-            }
-        }
-    },
     "scripts": {
         "vscode:prepublish": "npm run lint && tsc -p ./",
         "compile": "tsc --watch -p ./",
