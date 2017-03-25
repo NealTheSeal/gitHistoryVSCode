@@ -4,101 +4,106 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as logger from '../logger';
 
-let gitPath: string;
+let hgPath: string;
 
-export async function getGitPath(): Promise<string> {
-    if (gitPath !== undefined) {
-        return Promise.resolve(gitPath);
+export async function getHgPath(): Promise<string> {
+    if (hgPath !== undefined) {
+        return Promise.resolve(hgPath);
     }
     return new Promise<string>((resolve, reject) => {
-        const gitPathConfig = <string>vscode.workspace.getConfiguration('git').get('path');
-        if (typeof gitPathConfig === 'string' && gitPathConfig.length > 0) {
-            if (fs.existsSync(gitPathConfig)) {
-                logger.logInfo(`git path: ${gitPathConfig} - from vscode settings`);
-                gitPath = gitPathConfig;
-                resolve(gitPathConfig);
-                return;
-            }
-            else {
-                logger.logError(`git path: ${gitPathConfig} - from vscode settings in invalid`);
-            }
-        }
+        logger.logInfo(`hg path: using PATH environment variable`);
+        hgPath = 'hg';
+        resolve('hg');
+        return;
 
-        if (process.platform !== 'win32') {
-            logger.logInfo(`git path: using PATH environment variable`);
-            gitPath = 'git';
-            resolve('git');
-            return;
-        }
-        else {
-            // in Git for Windows, the recommendation is not to put git into the PATH.
-            // Instead, there is an entry in the Registry.
-            let regQueryInstallPath: (location: string, view: string | null) => Promise<string> = (location, view) => {
-                return new Promise((resolve, reject) => {
-                    let callback = function (error: any, stdout: any, stderr: any) {
-                        if (error && error.code !== 0) {
-                            error.stdout = stdout.toString();
-                            error.stderr = stderr.toString();
-                            reject(error);
-                            return;
-                        }
+        // const hgPathConfig = <string>vscode.workspace.getConfiguration('git').get('path');
+        // if (typeof hgPathConfig === 'string' && hgPathConfig.length > 0) {
+        //     if (fs.existsSync(hgPathConfig)) {
+        //         logger.logInfo(`git path: ${hgPathConfig} - from vscode settings`);
+        //         hgPath = hgPathConfig;
+        //         resolve(hgPathConfig);
+        //         return;
+        //     }
+        //     else {
+        //         logger.logError(`git path: ${hgPathConfig} - from vscode settings in invalid`);
+        //     }
+        // }
 
-                        let installPath = stdout.toString().match(/InstallPath\s+REG_SZ\s+([^\r\n]+)\s*\r?\n/i)[1];
-                        if (installPath) {
-                            resolve(installPath + '\\bin\\git');
-                        } else {
-                            reject();
-                        }
-                    };
+        // if (process.platform !== 'win32') {
+        //     logger.logInfo(`git path: using PATH environment variable`);
+        //     hgPath = 'git';
+        //     resolve('git');
+        //     return;
+        // }
+        // else {
+        //     // in Git for Windows, the recommendation is not to put git into the PATH.
+        //     // Instead, there is an entry in the Registry.
+        //     let regQueryInstallPath: (location: string, view: string | null) => Promise<string> = (location, view) => {
+        //         return new Promise((resolve, reject) => {
+        //             let callback = function (error: any, stdout: any, stderr: any) {
+        //                 if (error && error.code !== 0) {
+        //                     error.stdout = stdout.toString();
+        //                     error.stderr = stderr.toString();
+        //                     reject(error);
+        //                     return;
+        //                 }
 
-                    let viewArg = '';
-                    switch (view) {
-                        case '64': viewArg = '/reg:64'; break;
-                        case '32': viewArg = '/reg:64'; break;
-                        default: break;
-                    }
+        //                 let installPath = stdout.toString().match(/InstallPath\s+REG_SZ\s+([^\r\n]+)\s*\r?\n/i)[1];
+        //                 if (installPath) {
+        //                     resolve(installPath + '\\bin\\git');
+        //                 } else {
+        //                     reject();
+        //                 }
+        //             };
 
-                    exec('reg query ' + location + ' ' + viewArg, callback);
-                });
-            };
+        //             let viewArg = '';
+        //             switch (view) {
+        //                 case '64': viewArg = '/reg:64'; break;
+        //                 case '32': viewArg = '/reg:64'; break;
+        //                 default: break;
+        //             }
 
-            let queryChained: (locations: { key: string, view: string | null}[]) => Promise<string> = (locations) => {
-                return new Promise<string>((resolve, reject) => {
-                    if (locations.length === 0) {
-                        reject('None of the known git Registry keys were found');
-                        return;
-                    }
+        //             exec('reg query ' + location + ' ' + viewArg, callback);
+        //         });
+        //     };
 
-                    let location = locations[0];
-                    regQueryInstallPath(location.key, location.view).then(
-                        (location) => resolve(location),
-                        (error) => queryChained(locations.slice(1)).then(
-                            (location) => resolve(location),
-                            (error) => reject(error)
-                        )
-                    );
-                });
-            };
+        //     let queryChained: (locations: { key: string, view: string | null}[]) => Promise<string> = (locations) => {
+        //         return new Promise<string>((resolve, reject) => {
+        //             if (locations.length === 0) {
+        //                 reject('None of the known git Registry keys were found');
+        //                 return;
+        //             }
 
-            queryChained([
-                { 'key': 'HKCU\\SOFTWARE\\GitForWindows', 'view': null },     // user keys have precendence over
-                { 'key': 'HKLM\\SOFTWARE\\GitForWindows', 'view': null },     // machine keys
-                { 'key': 'HKCU\\SOFTWARE\\GitForWindows', 'view': '64' },   // default view (null) before 64bit view
-                { 'key': 'HKLM\\SOFTWARE\\GitForWindows', 'view': '64' },
-                { 'key': 'HKCU\\SOFTWARE\\GitForWindows', 'view': '32' },   // last is 32bit view, which will only be checked
-                { 'key': 'HKLM\\SOFTWARE\\GitForWindows', 'view': '32' }]). // for a 32bit git installation on 64bit Windows
-                then(
-                (path: string) => {
-                    logger.logInfo(`git path: ${path} - from registry`);
-                    gitPath = path;
-                    resolve(path);
-                },
-                (error: any) => {
-                    logger.logInfo(`git path: falling back to PATH environment variable`);
-                    gitPath = 'git';
-                    resolve('git');
-                });
-        }
+        //             let location = locations[0];
+        //             regQueryInstallPath(location.key, location.view).then(
+        //                 (location) => resolve(location),
+        //                 (error) => queryChained(locations.slice(1)).then(
+        //                     (location) => resolve(location),
+        //                     (error) => reject(error)
+        //                 )
+        //             );
+        //         });
+        //     };
+
+        //     queryChained([
+        //         { 'key': 'HKCU\\SOFTWARE\\GitForWindows', 'view': null },     // user keys have precendence over
+        //         { 'key': 'HKLM\\SOFTWARE\\GitForWindows', 'view': null },     // machine keys
+        //         { 'key': 'HKCU\\SOFTWARE\\GitForWindows', 'view': '64' },   // default view (null) before 64bit view
+        //         { 'key': 'HKLM\\SOFTWARE\\GitForWindows', 'view': '64' },
+        //         { 'key': 'HKCU\\SOFTWARE\\GitForWindows', 'view': '32' },   // last is 32bit view, which will only be checked
+        //         { 'key': 'HKLM\\SOFTWARE\\GitForWindows', 'view': '32' }]). // for a 32bit git installation on 64bit Windows
+        //         then(
+        //         (path: string) => {
+        //             logger.logInfo(`git path: ${path} - from registry`);
+        //             hgPath = path;
+        //             resolve(path);
+        //         },
+        //         (error: any) => {
+        //             logger.logInfo(`git path: falling back to PATH environment variable`);
+        //             hgPath = 'git';
+        //             resolve('git');
+        //         });
+        // }
     });
 }
 

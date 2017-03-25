@@ -90,7 +90,7 @@ export function activate(context: vscode.ExtensionContext) {
     let provider = new TextDocumentContentProvider();
     let registration = vscode.workspace.registerTextDocumentContentProvider(gitHistorySchema, provider);
 
-    let disposable = vscode.commands.registerCommand('git.viewHistory', () => {
+    let disposable = vscode.commands.registerCommand('hg.viewHistory', () => {
         // Unique name everytime, so that we always refresh the history log
         // Untill we add a refresh button to the view
         historyRetrieved = false;

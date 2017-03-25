@@ -29,11 +29,45 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:git.viewFileHistory",
-        "onCommand:git.viewLineHistory",
-        "onCommand:git.viewHistory"
+        "onCommand:hg.viewFileHistory",
+        "onCommand:hg.viewLineHistory",
+        "onCommand:hg.viewHistory"
     ],
     "main": "./out/src/extension",
+    "contributes": {
+        "commands": [
+            {
+                "command": "hg.viewHistory",
+                "title": "Hg: View History (hg log)"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "Hg History configuration",
+            "properties": {
+                "HgHistory.displayLabel": {
+                    "type": "string",
+                    "default": "${message}",
+                    "description": "Informations to display in history as label"
+                },
+                "HgHistory.displayDescription": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Informations to display in history as description"
+                },
+                "HgHistory.displayDetail": {
+                    "type": "string",
+                    "default": "${name} on ${date}",
+                    "description": "Informations to display in history as detail"
+                },
+                "HgHistory.logLevel": {
+                    "type": "string",
+                    "default": "Debug",
+                    "description": "Log Level [Debug|Info|Error]"
+                }
+            }
+        }
+    },
     "scripts": {
         "vscode:prepublish": "npm run lint && tsc -p ./",
         "compile": "tsc --watch -p ./",

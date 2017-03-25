@@ -2,18 +2,18 @@ import * as vscode from 'vscode';
 
 let outInfoChannel: vscode.OutputChannel;
 let outLogChannel: vscode.OutputChannel;
-const logLevel = <string>vscode.workspace.getConfiguration('gitHistory').get('logLevel');
+const logLevel = <string>vscode.workspace.getConfiguration('HgHistory').get('logLevel');
 
 function getInfoChannel() {
     if (outInfoChannel === undefined) {
-         outInfoChannel = vscode.window.createOutputChannel('Git History Info');
+         outInfoChannel = vscode.window.createOutputChannel('Hg History Info');
     }
     return outInfoChannel;
 }
 
 function getLogChannel() {
     if (outLogChannel === undefined) {
-         outLogChannel = vscode.window.createOutputChannel('Git History Log');
+         outLogChannel = vscode.window.createOutputChannel('Hg History Log');
     }
     return outLogChannel;
 }
@@ -21,7 +21,7 @@ function getLogChannel() {
 export function logError(error: any) {
     getLogChannel().appendLine(`[Error-${getTimeAndms()}] ${error.toString()}`.replace(/(\r\n|\n|\r)/gm, ''));
     getLogChannel().show();
-    vscode.window.showErrorMessage('There was an error, please view details in the \'Git History Log\' output window');
+    vscode.window.showErrorMessage('There was an error, please view details in the \'Hg History Log\' output window');
 }
 
 export function logInfo(message: string) {
