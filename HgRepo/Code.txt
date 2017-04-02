@@ -1,0 +1,7 @@
+def function(self):
+	"""function header"""
+	print "Hello World"
+
+def foo(bar):
+	"""this doesn't work"""
+	pass

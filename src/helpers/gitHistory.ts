@@ -8,7 +8,9 @@ import * as logger from '../logger';
 const LOG_ENTRY_SEPARATOR = '95E9659B-27DC-43C4-A717-D75969757EA5';
 const STATS_SEPARATOR = parser.STATS_SEPARATOR;
 // const LOG_FORMAT = `--format="%n${LOG_ENTRY_SEPARATOR}%nrefs=%d%ncommit=%H%ncommitAbbrev=%h%ntree=%T%ntreeAbbrev=%t%nparents=%P%nparentsAbbrev=%p%nauthor=%an <%ae> %at%ncommitter=%cn <%ce> %ct%nsubject=%s%nbody=%b%n%nnotes=%N%n${STATS_SEPARATOR}%n"`;
-const LOG_FORMAT = '\\n95E9659B-27DC-43C4-A717-D75969757EA5\\nrefs={branches}\\ncommit={node}\\ncommitAbbrev={rev}\\nparents={parents}\\nauthor={author}\\ncommitter={author}\\nsubject={desc}\\n95E9659B-27DC-43C4-A717-D75969757EA1\\n';
+const LOG_FORMAT = `\\n${LOG_ENTRY_SEPARATOR}\\nrefs={branches}\\ncommit={node}\\ncommitAbbrev={rev}\\nparents={parents}\\nauthor={author}{date}\\ncommitter={author}{date}\\nsubject={desc}\\n${STATS_SEPARATOR}\\n{files}\\n`;
+
+// hg log --template \n95E9659B-27DC-43C4-A717-D75969757EA5\nrefs={branches}\ncommit={node}\ncommitAbbrev={rev}\nparents={parents}\nauthor={author}{date}\ncommitter={author}{date}\nsubject={desc}\n95E9659B-27DC-43C4-A717-D75969757EA1\n{files}\n
 
 export async function getLogEntries(rootDir: string, pageIndex: number = 0, pageSize: number = 100): Promise<LogEntry[]> {
     const args = ['log', '--template', LOG_FORMAT];
@@ -26,9 +28,7 @@ export async function getLogEntries(rootDir: string, pageIndex: number = 0, page
 
         ls.stdout.setEncoding('utf8');
         ls.stdout.on('data', (data: string) => {
-            logger.logInfo(data);
             data.split(/\r?\n/g).forEach((line, index, lines) => {
-                logger.logDebug(line);
                 if (line === LOG_ENTRY_SEPARATOR) {
                     let entry = parser.parseLogEntry(outputLines);
                     if (entry !== null) {
